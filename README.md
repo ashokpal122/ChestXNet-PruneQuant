@@ -1,149 +1,174 @@
-ChestXNet-PruneQuant — Project Report
+# 🩺 ChestXNet-PruneQuant — Project Report  
 
-Deep learning–based pneumonia detection from chest X-rays with pruning & quantization
+**Deep learning–based pneumonia detection from chest X-rays with pruning & quantization**  
 
+---
 
-Executive Summary
+## 📑 Executive Summary  
 
-This project develops and evaluates an efficient deep-learning pipeline to classify chest X-ray images as Normal or Pneumonia. A pretrained ResNet50 backbone with a compact classification head was fine-tuned on a small dataset (378 images). To enable deployment on resource-constrained devices, the trained model was compressed using pruning and dynamic quantization. Key findings from an example run: baseline test accuracy ≈ 94.64%, pruned variants ≈ 96.43%, and quantized models preserved baseline accuracy while reducing model size for CPU inference.
+This project develops and evaluates an efficient deep-learning pipeline to classify chest X-ray images as **Normal** or **Pneumonia**.  
 
-1. Introduction
+- Backbone: **ResNet50 (pretrained)** with a compact classification head  
+- Dataset: **378 images** (Normal: 200, Pneumonia: 178)  
+- Compression: **Pruning & Dynamic Quantization**  
 
-Early, accurate detection of pneumonia from chest radiographs can significantly improve patient outcomes. While deep neural networks deliver strong performance, real-world deployment often requires smaller, faster models. This work aims to train a high-quality classifier and demonstrate model compression approaches (pruning and quantization) that preserve—or sometimes improve—performance while making the model more practical for edge devices.
+**Key Findings (example run):**
+- Baseline test accuracy ≈ **94.64%**  
+- Pruned variants ≈ **96.43%**  
+- Quantized models preserved baseline accuracy while reducing size for CPU inference ✅  
 
-2. Dataset & Preprocessing
-2.1 Dataset
+---
 
-Total images: 378
+## 📖 1. Introduction  
 
-Normal: 200
+Early, accurate detection of pneumonia from chest radiographs can significantly improve patient outcomes.  
+While deep neural networks deliver strong performance, real-world deployment often requires **smaller, faster models**.  
 
-Pneumonia: 178
+This work aims to:  
+- Train a high-quality classifier  
+- Apply **pruning** and **quantization** for model compression  
+- Preserve—or even improve—performance while making the model practical for **edge devices**  
 
-Structure: standard ImageFolder layout (one folder per class).
+---
+
+## 📊 2. Dataset & Preprocessing  
+
+### 2.1 Dataset  
+- **Total images:** 378  
+- **Normal:** 200  
+- **Pneumonia:** 178  
+- **Structure:** Standard *ImageFolder* layout (one folder per class).  
+
 ![Class Distribution](figure/images/Class_Distribution.png)  
-*Figure 1 — Class Distribution of Our Dataset.*
+*Figure 1 — Class distribution of the dataset.*  
 
-2.2 Splitting & Reproducibility
+---
 
-Train / Val / Test: 70% / 15% / 15% (seeded sampling for reproducibility).
+### 2.2 Splitting & Reproducibility  
+- Train / Val / Test: **70% / 15% / 15%**  
+- Stratified splits preserve class balance  
+- Seeded for reproducibility  
 
-Splits preserve class proportions.
-![Split Data](figure/images/Dataset_split.png)  
-*Figure 2 — Dataset Split into Train, Validation, Test.*
+![Dataset Split](figure/images/Dataset_split.png)  
+*Figure 2 — Train/Validation/Test dataset split.*  
 
-2.3 Preprocessing & Augmentation
+---
 
-Input size: 224 × 224 (ResNet50).
+### 2.3 Preprocessing & Augmentation  
+- **Input size:** 224 × 224 (ResNet50 requirement)  
+- **Augmentations:** horizontal flip, ±10° rotation, color jitter  
+- **Normalization:** ImageNet mean/std  
+- **Imbalance handling:** WeightedRandomSampler + class-weighted loss  
 
-Training augmentations: random horizontal flip, small rotation (±10°), color jitter.
+---
 
-Normalization: ImageNet mean/std.
+## 🏗️ 3. Model Architecture  
 
-Imbalance handled via WeightedRandomSampler and class-weighted loss.
+- **Backbone:** ResNet50 (pretrained on ImageNet)  
+- **Head:**  
+  - Linear(2048 → 512) → BatchNorm → ReLU → Dropout(0.5) → Linear(512 → 2)  
 
-3. Model Architecture
+💡 *Rationale:* ResNet50 provides strong feature extraction, while the lightweight head ensures regularization and good fit for small datasets.  
 
-Backbone: ResNet50 (pretrained on ImageNet).
+---
 
-Head: Linear(2048 → 512) → BatchNorm → ReLU → Dropout(0.5) → Linear(512 → 2).
+## ⚙️ 4. Training & Evaluation Protocol  
 
-Rationale: pretrained ResNet50 provides robust feature extraction; the lightweight head balances capacity and regularization for small datasets.
+- **Optimizer:** Adam (lr = 1e-4)  
+- **Loss:** Weighted CrossEntropy (optional: FocalLoss)  
+- **Batch size:** 32 | **Epochs:** 12  
+- **Metrics tracked per epoch:**  
+  - Accuracy, Precision, Recall, F1 (macro)  
+  - AUC (ROC & PR)  
+  - Loss (train & validation)  
 
-4. Training & Evaluation Protocol
+👉 Best model selected by **minimum validation loss** → saved as `best_model.pth`  
 
-Optimizer: Adam (lr = 1e-4)
+---
 
-Loss: CrossEntropy with class weights (or optional FocalLoss)
+## 📈 5. Results  
 
-Batch size: 32; Epochs: 12 (example)
-
-Metrics logged each epoch: accuracy, precision (macro), recall (macro), F1 (macro), AUC (macro), AUC-PR (macro), loss for both train and validation.
-
-Best model selected by minimum validation loss and saved as best_model.pth.
-
-5. Results
-5.1 Training Behavior
-
-Training converges quickly with augmentations and regularization. Validation metrics are stable with minor fluctuations expected due to the small validation set.
+### 5.1 Training Behavior  
+- Training converged quickly with augmentations & regularization  
+- Validation metrics stable with minor fluctuations  
 
 ![Training Curves](figure/images/Training&validation_loss&accuracy_curves.png)  
-*Figure 3 — Training vs Validation (Accuracy and Loss Curves).*
+*Figure 3 — Training vs Validation curves.*  
 
-5.2 Test Performance (example run)
+---
 
-Baseline test accuracy: ≈ 94.64%
-
-Example classification report (test set) demonstrates balanced precision and recall across classes; very few misclassifications occurred with only one critical false negative in the example run.
+### 5.2 Test Performance (example run)  
+- **Baseline test accuracy:** ≈ **94.64%**  
+- Balanced precision/recall across classes  
+- Only one critical false negative in test set  
 
 ![Testing Accuracy](figure/images/testing_accuracy.png)  
-*Figure 4 — Model's Classification Reports.*
+*Figure 4 — Classification Report.*  
 
 ![Confusion Matrix](figure/images/confusion_matrix.png)  
-*Figure 5 — Confusion Matrix.*
+*Figure 5 — Confusion Matrix.*  
 
-6. Model Optimization
-6.1 Pruning — what & why
+---
 
-Pruning removes weights or entire structures to reduce model size and computation. Two styles:
+## 🪓 6. Model Optimization  
 
-Unstructured pruning: removes individual low-magnitude weights (e.g., global L1). Produces sparse weight matrices; storage benefits require sparse support.
+### 6.1 Pruning — What & Why  
+- **Unstructured pruning:** removes low-magnitude weights → sparse matrices  
+- **Structured pruning:** removes entire filters/channels → real speedups  
+- **Benefits:** lower size, potential accuracy gain (regularization)  
+- **Risks:** over-pruning can harm accuracy  
 
-Structured pruning: removes whole filters/channels, directly reducing FLOPs and enabling faster dense computation.
+---
 
-Benefits: lower model size, possible regularization effect, potential inference speedups (with correct tooling).
-Risks: aggressive pruning may remove informative weights and harm accuracy.
+### 6.2 Pruning in this project  
+- **One-shot global L1 pruning (50%)**  
+- **Iterative pruning (3 × 20%)** with optional fine-tuning  
+- **Per-layer sensitivity analysis** identifies robust vs critical layers  
 
-6.2 Pruning applied here
-
-One-shot global L1 pruning (50%) applied across Conv and Linear weights.
-
-Iterative pruning: repeated smaller pruning steps (3 × 20%) optionally with re-training between steps.
-
-Per-layer sensitivity analysis identifies layers that tolerate pruning vs. those that are critical.
-
-Reported example results:
-
-One-shot (50%): ≈ 96.43% test accuracy.
-
-Iterative (3×20%): ≈ 96.43% test accuracy.
-Observation: pruning can act as a regularizer and sometimes improve accuracy on small datasets — verify across multiple seeds.
+**Example results:**  
+- One-shot (50%): ≈ **96.43%**  
+- Iterative (3×20%): ≈ **96.43%**  
 
 ![Per Layer Sensitivity](figure/images/per_layer_pruning_sensitivity_analysis.png)  
-*Figure 6 — Per Layer Pruning Sensitivity Analysis.*
+*Figure 6 — Layer-wise pruning sensitivity.*  
 
 ![Baseline vs Pruning](figure/images/baselineVSpruning_accuracy_comparision.png)  
-*Figure 7 — Baseline vs Pruning Accuracy comparision.*
+*Figure 7 — Baseline vs Pruning Accuracy Comparison.*  
 
-6.3 Quantization — what & why
+---
 
-Quantization reduces numeric precision (float32 → int8), shrinking model size and often improving CPU inference speed. Approaches:
+### 6.3 Quantization — What & Why  
+- Reduces precision (FP32 → INT8)  
+- **Dynamic quantization:** fast, applied post-training → best for Linear/LSTM layers  
+- **Benefits:** smaller model size + faster CPU inference  
+- **Applied here:** dynamic quantization of Linear layers → accuracy preserved  
 
-Dynamic quantization: quick post-training quantization ideal for Linear / LSTM layers.
+---
 
-Static quantization / QAT: better for convolutional networks but requires calibration or training.
+## 📊 7. Comparative Summary (example run)  
 
-Applied here: dynamic quantization of Linear layers (qint8), resulting in preserved accuracy (≈ baseline) with reduced size and faster CPU inference.
+| Model Variant              | Test Accuracy |
+|-----------------------------|---------------|
+| Baseline (FP32)             | ≈ 94.64%      |
+| One-shot prune (50%)        | ≈ 96.43%      |
+| Iterative prune (3×20%)     | ≈ 96.43%      |
+| Dynamic quantized (INT8)    | ≈ 94.64%      |
 
+![Final Comparison](figure/images/final_model_accuracy_comparision.png)  
+*Figure 8 — Comparative Analysis of Baseline, Pruned, and Quantized Models.*  
 
-7. Comparative Summary (example run)
-Model variant	Test accuracy
-Baseline	≈ 94.64%
-One-shot prune (50%)	≈ 96.43%
-Iterative prune (3×20%)	≈ 96.43%
-Dynamic quantized (int8)	≈ 94.64%
+---
 
-![Final comparison](figure/images/final_model_accuracy_comparision.png)  
-*Figure 5 — Comparative Analysis.*
+## ✅ 8. Conclusions & Recommendations  
 
-Interpretation: pruning and quantization provide complementary benefits — pruning can reduce overfitting and parameter redundancy, while quantization enables compact, fast CPU inference. Results are dataset-sensitive; repeat and average across seeds for robust claims.
+- **Fine-tuned ResNet50** delivers strong performance on small dataset (≈ 95% accuracy)  
+- **Pruning** can *improve* generalization while reducing redundancy  
+- **Quantization** reduces size & improves CPU latency with negligible accuracy loss  
+- For deployment:  
+  - Perform multiple runs & cross-validation  
+  - Measure latency on target devices (ARM/mobile)  
+  - Explore QAT & structured pruning for further runtime gains  
 
-9. Conclusions & Recommendations
+---
 
-A ResNet50 fine-tuned with careful augmentation and class-balance techniques yields high accuracy on the example dataset.
-
-Pruning can produce compact models with preserved or improved accuracy when applied carefully (use per-layer sensitivity to guide pruning).
-
-Dynamic quantization is an easy post-training step to reduce model size and improve CPU inference without additional training.
-
-For production: perform multiple runs, cross-validation, measure latency on the target device (ARM CPU / mobile), and consider QAT / structured pruning to maximize runtime gains.
+📌 **Next Steps:** Extend dataset, test on multiple seeds, and benchmark on edge devices.  
