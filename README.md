@@ -21,7 +21,7 @@ Normal: 200
 Pneumonia: 178
 
 Structure: standard ImageFolder layout (one folder per class).
-![Class Distribution](figure/images/Class_Distribution (2).png)  
+![Class Distribution](figure/images/Class_Distribution.png)  
 *Figure 1 — Class Distribution of Our Dataset.*
 
 2.2 Splitting & Reproducibility
