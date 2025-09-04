@@ -111,6 +111,7 @@ Observation: pruning can act as a regularizer and sometimes improve accuracy on 
 
 ![Per Layer Sensitivity](figure/images/per_layer_pruning_sensitivity_analysis.png)  
 *Figure 6 — Per Layer Pruning Sensitivity Analysis.*
+
 ![Baseline vs Pruning](figure/images/baselineVSpruning_accuracy_comparision.png)  
 *Figure 7 — Baseline vs Pruning Accuracy comparision.*
 
