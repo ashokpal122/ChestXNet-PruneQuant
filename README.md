@@ -1,5 +1,12 @@
 # 🩺 ChestXNet-PruneQuant — Project Report  
 
+![Accuracy](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/accuracy.json)
+![Pruned Accuracy](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/prunned.json)
+![Quantized Accuracy](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/quantized.json)
+![Dataset](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/dataset.json)
+![Framework](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/framework.json)
+![Model Size](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ashokpal122/ec049df43a0e80cfdd9134cefd40d24d/raw/62279417bb546b8d8f24516f4142b1ab34efb148/modelsize.json)
+
 **Deep learning–based pneumonia detection from chest X-rays with pruning & quantization**  
 
 ---
